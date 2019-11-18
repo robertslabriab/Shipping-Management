@@ -1,0 +1,11 @@
+Progress so far:
+-create GUI for shipping information input.
+
+TODO:
+-create a main menu for the GUI to give option of entering new information and retrieving current/old shipping information.
+-write code for text processing (take raw inputs and organize information for use on the manufacture side).
+-create executable jar file to run shipping management program.
+
+Overall purpose:
+-shipping management system that organizes customer order/shipping information and generate a shipping invoice for shipments.
+-management system should also allow manufacture to look back and pull up desired order/shipping information.
