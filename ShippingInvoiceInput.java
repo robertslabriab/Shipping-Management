@@ -1,6 +1,3 @@
-//javac -cp .;junit-cs211.jar *.java
-//java -cp .;junit-cs211.jar ShippingInvoiceInput
-
 import javax.swing.*;
 public class ShippingInvoiceInput{
     
@@ -20,9 +17,5 @@ public class ShippingInvoiceInput{
         String unitPrice=JOptionPane.showInputDialog(InvoiceFrame,"Unit Price");
         String comments=JOptionPane.showInputDialog(InvoiceFrame,"Comments/Notes");
         InvoiceFrame.setVisible(true);
-    }
-
-    public static void main(String[]args){
-        new ShippingInvoiceInput();
     }
 }
