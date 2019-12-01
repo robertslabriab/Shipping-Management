@@ -3,6 +3,12 @@ import java.awt.event.*;
 import java.util.*;
 import java.text.*;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
+
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
@@ -55,8 +61,8 @@ public class MainMenu{
         infoFrame.setLocation(dim.width/2-infoFrame.getSize().width/2, dim.height/2-infoFrame.getSize().height/2);
         JButton table=new JButton("Table");
         infoFrame.add(table);
-        JButton search=new JButton("Search");
-        infoFrame.add(search);
+        //JButton search=new JButton("Search");
+        //infoFrame.add(search);
         JButton remove=new JButton("Remove");
         infoFrame.add(remove);
         JButton menuButton=new JButton("Main Menu");
@@ -80,12 +86,14 @@ public class MainMenu{
 				}
             }
         });
+        /*
         search.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 infoFrame.dispose();
-                searchDisplay();
+                //searchDisplay();
             }
         });
+        */
         remove.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 infoFrame.dispose();
@@ -131,7 +139,55 @@ public class MainMenu{
         JButton menuButton=new JButton("Main Menu");
         inputShippingFrame.add(menuButton);
         inputShippingFrame.setVisible(true);
+        
+
         //inputShippingInformationDisplay:element actions
+        orderNumber.addKeyListener(new KeyAdapter() {
+        	public void keyPressed(KeyEvent key){
+        		if(key.getKeyChar()>='0'&&key.getKeyChar()<='9'){
+        			orderNumber.setEditable(true);
+        		}
+        		else if(key.getKeyChar()==' '||key.getKeyChar()=='\b'){orderNumber.setEditable(true);}
+        		else{orderNumber.setEditable(false);}
+        	}
+        });
+        
+        productNumber.addKeyListener(new KeyAdapter() {
+        	public void keyPressed(KeyEvent key){
+        		if(key.getKeyChar()>='0'&&key.getKeyChar()<='9'){
+        			productNumber.setEditable(true);
+        		}
+        		else if(key.getKeyChar()==' '||key.getKeyChar()=='\b'){productNumber.setEditable(true);}
+        		else{productNumber.setEditable(false);}
+        	}
+        });
+        
+        quantity.addKeyListener(new KeyAdapter() {
+        	public void keyPressed(KeyEvent key){
+        		if(key.getKeyChar()>='0'&&key.getKeyChar()<='9'){
+        			quantity.setEditable(true);
+        		}
+        		else if(key.getKeyChar()==' '||key.getKeyChar()=='\b'){quantity.setEditable(true);}
+        		else{quantity.setEditable(false);}
+        	}
+        });
+        
+        unitPrice.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent key){
+        		if(key.getKeyChar()>='0'&&key.getKeyChar()<='9'){
+        			unitPrice.setEditable(true);
+        		}
+        		else if(key.getKeyChar()==' '||key.getKeyChar()=='\b'){
+        			unitPrice.setEditable(true);
+        		}
+        		else if (key.getKeyChar()=='.'){
+        			if(unitPrice.getText().contains(".")){unitPrice.setEditable(false);}
+        			else{unitPrice.setEditable(true);}
+        		}
+        		else{unitPrice.setEditable(false);}
+        	}
+        });
+        
         menuButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 inputShippingFrame.dispose();
@@ -305,23 +361,52 @@ public class MainMenu{
         String[]colName={"Order Number","Product","Product No.","Qty","Unit Price",
                             "Subtotal","Tax","Total","Name","Address","Phone No.",
                             "Email","Notes"};
-        Object[][]rowData=invoice.fileReader();   
+        Object[][]rowData=invoice.fileReader(); 
 
         JLabel shippingInfoL=new JLabel("Shipping Information");
         tableFrame.add(shippingInfoL);
-        final JTable table=new JTable(rowData,colName);
-        table.setPreferredScrollableViewportSize(new Dimension(1000,700));
+        DefaultTableModel model=new DefaultTableModel(rowData,colName);
+        final JTable table=new JTable(model);
+        table.setPreferredScrollableViewportSize(new Dimension(1300,600));
         table.setFillsViewportHeight(true);
         JScrollPane scrollPane=new JScrollPane(table);
-        //scrollPane.setPreferredSize(new Dimension(1000,20));
+        scrollPane.setPreferredSize(new Dimension(1300,600));
         tableFrame.add(scrollPane,BorderLayout.CENTER);
-        //tableFrame.add(table);
         
+        JButton menuButton=new JButton("Main Menu");
+        tableFrame.add(menuButton);
         JButton cancelButton=new JButton("Back");
         tableFrame.add(cancelButton);
-        JButton menuButton=new JButton("Main Menu");
-        tableFrame.add(menuButton);     
+        JLabel searchL=new JLabel("Search");
+        tableFrame.add(searchL);
+        JTextField searchField=new JTextField(20);
+        tableFrame.add(searchField);
         tableFrame.setVisible(true);
+
+        
+        TableRowSorter<TableModel> rowSorter=new TableRowSorter<>(table.getModel());
+       	table.setRowSorter(rowSorter);
+       	searchField.getDocument().addDocumentListener(new DocumentListener(){
+
+			@Override public void changedUpdate(DocumentEvent arg0) {
+                throw new UnsupportedOperationException();
+            }
+            
+			@Override public void insertUpdate(DocumentEvent arg0) {
+				String text=searchField.getText();
+				if(text.trim().length()==0){rowSorter.setRowFilter(null);}
+       			else{rowSorter.setRowFilter(RowFilter.regexFilter("(?i)"+text));}
+			}
+
+			@Override public void removeUpdate(DocumentEvent arg0) {
+                String text=searchField.getText();
+				if(text.trim().length()==0){
+                    rowSorter.setRowFilter(null);
+                }
+                else{rowSorter.setRowFilter(RowFilter.regexFilter("(?i)"+text));}	
+			}
+       		
+       	});
         //informationTableDisplay:element actions
         menuButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
@@ -336,7 +421,7 @@ public class MainMenu{
             }
         });
     }
-
+    /*
     public void searchDisplay(){
         //searchDisplay:frame+frame elements
         JFrame searchFrame=new JFrame("Shipping Management");
@@ -375,7 +460,7 @@ public class MainMenu{
             }
         });
     }
-
+	*/
     public void removeDisplay(){
         //removeDisplay:frame+frame elements
         JFrame removeFrame=new JFrame("Shipping Management");
