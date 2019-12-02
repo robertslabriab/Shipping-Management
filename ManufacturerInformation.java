@@ -15,9 +15,6 @@ public class ManufacturerInformation{
         this.productNumber=productNumber;
         this.quantity=quantity;
         this.unitPrice=unitPrice;
-        String[] manfacturerInformationArray=new String[]{this.orderNumber,this.product,
-                            this.productNumber,this.quantity,this.unitPrice,
-                            String.valueOf(subTotal()),String.valueOf(SALES_TAX),String.valueOf(totalPrice())};
     }
 
     public String getOrderNumber(){return this.orderNumber;}

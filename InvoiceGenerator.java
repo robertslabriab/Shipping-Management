@@ -7,13 +7,10 @@ public class InvoiceGenerator{
     CustomerInformation customer;
     final File invoiceFolder=new File("C:/Invoice");
     final File allInvoices=new File("C:/Invoice/invoices");
-    final String fileName="C:/Invoice/TESTER.txt";
+    final String fileName="C:/Invoice/Invoice Collection.txt";
     WriteFile data=new WriteFile(fileName,true);
-   
-
     ArrayList<String> infoArray=new ArrayList<String>();
     int searchIndex=0;
-
 
     public InvoiceGenerator(){}
     public InvoiceGenerator(ManufacturerInformation manufacturer,CustomerInformation customer){
@@ -26,6 +23,7 @@ public class InvoiceGenerator{
     	allInvoices.mkdir();
     	data.newFile();
     }
+    
     public void removeFromFile(String removed) throws IOException{
         if(searchOrderNumber(removed)==true){
             data.clearFile();
@@ -77,14 +75,12 @@ public class InvoiceGenerator{
         }
         return flag;
     }
-    
-    
 
     public void addInvoiceElement(ManufacturerInformation manu,CustomerInformation cust){
         this.manufacturer=manu;
         this.customer=cust;
     }
-    //TODO:generate text file
+
     public void generateInvoice(String orderNum){
     	try{
 			if(searchOrderNumber(orderNum)==true){
@@ -105,16 +101,14 @@ public class InvoiceGenerator{
                 invoiceFile.writeToFile("SUBTOTAL"+"\t"+"\t"+invArray[searchIndex][5]);
                 invoiceFile.writeToFile("SALES TAX"+"\t"+"\t"+invArray[searchIndex][6]);
                 invoiceFile.writeToFile("TOTAL PRICE"+"\t"+"\t"+invArray[searchIndex][7]);
+                invoiceFile.writeToFile("");
                 if(invArray[searchIndex][12]==null){
-                    invoiceFile.writeToFile("");
                     invoiceFile.writeToFile("NOTES"+"\t"+"\t"+"\tn/a");
-                }                   
+                }
+                else{invoiceFile.writeToFile("NOTES"+"\t"+"\t"+"\t"+invArray[searchIndex][12]);}
 			}
         }
-    	catch (IOException e){
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-        }
+    	catch (IOException e){e.printStackTrace();}
     }
 
     public void generateAllInvoices(){
@@ -125,11 +119,7 @@ public class InvoiceGenerator{
 	            generateInvoice(invArray[orderNum][0]);
 	        }
 		} 
-		catch(IOException e){
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
+		catch(IOException e){e.printStackTrace();} 
     }
 
     @Override public String toString(){return String.format("%s| %s",this.manufacturer.toString(),this.customer.toString());}
