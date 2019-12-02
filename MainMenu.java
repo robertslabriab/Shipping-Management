@@ -1,16 +1,11 @@
-//FIXME: fix imports
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
-import java.text.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.IOException;
 public class MainMenu{
     
@@ -19,13 +14,16 @@ public class MainMenu{
     ManufacturerInformation mInfo=new ManufacturerInformation();
     CustomerInformation cInfo=new CustomerInformation();
     InvoiceGenerator invoice=new InvoiceGenerator();
-    
+
     public MainMenu(){
-    	try{invoice.fileUpdated();}
-        catch(IOException e){
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-        }   
+    		try {
+				invoice.createInvoiceFolder();
+				invoice.fileUpdated();
+			} 
+    		catch(IOException e1){
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
     }
 
     public void mainMenuDisplay(){
@@ -51,48 +49,11 @@ public class MainMenu{
         oldInfo.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 menuFrame.dispose();
-                informationDisplay();
-            }
-        });
-    }
-
-    public void informationDisplay(){
-        //informationDisplay:frame+frame elements
-        JFrame infoFrame=new JFrame("Shipping Management");
-        infoFrame.setLayout(frameLayout);
-        infoFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        infoFrame.setSize(500,500);
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        infoFrame.setLocation(dim.width/2-infoFrame.getSize().width/2, dim.height/2-infoFrame.getSize().height/2);
-        JButton table=new JButton("Table");
-        infoFrame.add(table);
-        JButton remove=new JButton("Remove");
-        infoFrame.add(remove);
-        JButton menuButton=new JButton("Main Menu");
-        infoFrame.add(menuButton);
-        infoFrame.setVisible(true);
-        //informationDisplay:element actions
-        menuButton.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                infoFrame.dispose();
-                mainMenuDisplay();
-            }
-        });
-        table.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                infoFrame.dispose();
-                try{
-					informationTableDisplay();
-				}catch (IOException e1) {
+                try{informationTableDisplay();} 
+                catch(IOException e1){
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-            }
-        });
-        remove.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                infoFrame.dispose();
-                removeDisplay();
             }
         });
     }
@@ -197,6 +158,18 @@ public class MainMenu{
 							unitPrice.getText().isEmpty()){
 						JOptionPane.showMessageDialog(null,"1 or more fields are empty");
 					}
+					else{
+			            mInfo=new ManufacturerInformation(orderNumber.getText(),product.getText()
+			                        ,productNumber.getText(),quantity.getText(),unitPrice.getText());
+			            try{
+							inputCustomerInformationDisplay();
+	                    }
+	                    catch(IOException e1){
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+			            }
+			            inputShippingFrame.dispose();      
+			        }
                 }
                 catch(HeadlessException e2){
 					// TODO Auto-generated catch block
@@ -206,18 +179,7 @@ public class MainMenu{
 					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				}
-                if(orderNumber.getText().equals("")==false){
-		            mInfo=new ManufacturerInformation(orderNumber.getText(),product.getText()
-		                        ,productNumber.getText(),quantity.getText(),unitPrice.getText());
-		            try{
-						inputCustomerInformationDisplay();
-                    }
-                    catch(IOException e1){
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-		            }
-		            inputShippingFrame.dispose();      
-		        }
+                
             }
         });
         cancelButton.addActionListener(new ActionListener(){
@@ -352,8 +314,8 @@ public class MainMenu{
         JFrame tableFrame=new JFrame("Shipping Management");
         tableFrame.setLayout(frameLayout);
         tableFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        tableFrame.setSize(500,500);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
+        tableFrame.setSize(dim);
         tableFrame.setLocation(dim.width/2-tableFrame.getSize().width/2, dim.height/2-tableFrame.getSize().height/2);
         String[]colName={"Order Number","Product","Product No.","Qty","Unit Price",
                             "Subtotal","Tax","Total","Name","Address","Phone No.",
@@ -372,12 +334,18 @@ public class MainMenu{
         tableFrame.add(scrollPane,BorderLayout.CENTER);
         JButton menuButton=new JButton("Main Menu");
         tableFrame.add(menuButton);
-        JButton cancelButton=new JButton("Back");
-        tableFrame.add(cancelButton);
         JLabel searchL=new JLabel("Search");
         tableFrame.add(searchL);
         JTextField searchField=new JTextField(20);
         tableFrame.add(searchField);
+        JButton genInvoiceButton=new JButton("Create Invoice");
+        tableFrame.add(genInvoiceButton);
+        JButton genAllInvoiceButton=new JButton("Create All Invoices");
+        tableFrame.add(genAllInvoiceButton);
+        JButton removeButton=new JButton("Remove");
+        tableFrame.add(removeButton);
+        JButton removeAllButton=new JButton("Remove All");
+        tableFrame.add(removeAllButton);
         tableFrame.setVisible(true);
         //searcher
         TableRowSorter<TableModel> rowSorter=new TableRowSorter<>(table.getModel());
@@ -406,65 +374,52 @@ public class MainMenu{
                 mainMenuDisplay();
             }
         });
-        cancelButton.addActionListener(new ActionListener(){
+        genInvoiceButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-            	tableFrame.dispose();
-                informationDisplay();
+                try{
+            		if(invoice.searchOrderNumber(searchField.getText())==true){
+						invoice.generateInvoice(searchField.getText());
+            		}
+					searchField.setText("");
+				}
+            	catch(IOException e1){
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
             }
         });
-    }
-    
-    public void removeDisplay(){
-        //removeDisplay:frame+frame elements
-        JFrame removeFrame=new JFrame("Shipping Management");
-        removeFrame.setLayout(frameLayout);
-        removeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        removeFrame.setSize(500,500);
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        removeFrame.setLocation(dim.width/2-removeFrame.getSize().width/2, dim.height/2-removeFrame.getSize().height/2);
-        JLabel removeL=new JLabel("Remove Order Number");
-        removeFrame.add(removeL);
-        JTextField remove=new JTextField(40);
-        removeFrame.add(remove);
-        JButton okButton=new JButton("OK");
-        removeFrame.add(okButton);
-        JButton cancelButton=new JButton("Back");
-        removeFrame.add(cancelButton);
-        JButton menuButton=new JButton("Main Menu");
-        removeFrame.add(menuButton);
-        removeFrame.setVisible(true);
-        //removeDisplay:frame+frame elements
-        menuButton.addActionListener(new ActionListener(){
+        genAllInvoiceButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                removeFrame.dispose();
-                mainMenuDisplay();
+				invoice.generateAllInvoices();
             }
         });
-        okButton.addActionListener(new ActionListener(){
+        removeButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                removeFrame.dispose();
-            }
+            	try{
+            		if(invoice.searchOrderNumber(searchField.getText())==true){
+						invoice.removeFromFile(searchField.getText());
+						model.removeRow(invoice.searchIndex);
+            		}
+					searchField.setText("");
+				}
+            	catch(IOException e1){
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            } 
         });
-        cancelButton.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                removeFrame.dispose();
-                informationDisplay();
+        removeAllButton.addActionListener(new ActionListener(){
+        	public void actionPerformed(ActionEvent e){
+            	try{
+						invoice.removeAllFromFile();
+						model.setNumRows(0);
+            		}
+            	catch(IOException e1){
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
             }
+            
         });
-    }
-
-    public void invoiceDisplay(){
-        JFrame invoiceFrame=new JFrame("Shipping Management");
-        invoiceFrame.setLayout(frameLayout);
-        invoiceFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        invoiceFrame.setSize(500,500);
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        invoiceFrame.setLocation(dim.width/2-invoiceFrame.getSize().width/2, dim.height/2-invoiceFrame.getSize().height/2);
-        JLabel invoiceL=new JLabel("Invoice: Customer Name");
-        invoiceFrame.add(invoiceL);
-        //------
-        JTextField invoiceField=new JTextField(invoice.toString());
-        invoiceFrame.add(invoiceField);
-        invoiceFrame.setVisible(true);
     }
 }
