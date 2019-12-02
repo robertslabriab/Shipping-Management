@@ -1,3 +1,4 @@
+//FIXME: fix imports
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -8,7 +9,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.IOException;
@@ -19,9 +19,14 @@ public class MainMenu{
     ManufacturerInformation mInfo=new ManufacturerInformation();
     CustomerInformation cInfo=new CustomerInformation();
     InvoiceGenerator invoice=new InvoiceGenerator();
-
-	
-    public MainMenu(){}
+    
+    public MainMenu(){
+    	try{invoice.fileUpdated();}
+        catch(IOException e){
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+        }   
+    }
 
     public void mainMenuDisplay(){
         //mainMenuDisplay:frame+frame elements
@@ -61,8 +66,6 @@ public class MainMenu{
         infoFrame.setLocation(dim.width/2-infoFrame.getSize().width/2, dim.height/2-infoFrame.getSize().height/2);
         JButton table=new JButton("Table");
         infoFrame.add(table);
-        //JButton search=new JButton("Search");
-        //infoFrame.add(search);
         JButton remove=new JButton("Remove");
         infoFrame.add(remove);
         JButton menuButton=new JButton("Main Menu");
@@ -78,22 +81,14 @@ public class MainMenu{
         table.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 infoFrame.dispose();
-                try {
+                try{
 					informationTableDisplay();
-				} catch (IOException e1) {
+				}catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
             }
         });
-        /*
-        search.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                infoFrame.dispose();
-                //searchDisplay();
-            }
-        });
-        */
         remove.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 infoFrame.dispose();
@@ -139,8 +134,6 @@ public class MainMenu{
         JButton menuButton=new JButton("Main Menu");
         inputShippingFrame.add(menuButton);
         inputShippingFrame.setVisible(true);
-        
-
         //inputShippingInformationDisplay:element actions
         orderNumber.addKeyListener(new KeyAdapter() {
         	public void keyPressed(KeyEvent key){
@@ -151,7 +144,6 @@ public class MainMenu{
         		else{orderNumber.setEditable(false);}
         	}
         });
-        
         productNumber.addKeyListener(new KeyAdapter() {
         	public void keyPressed(KeyEvent key){
         		if(key.getKeyChar()>='0'&&key.getKeyChar()<='9'){
@@ -161,7 +153,6 @@ public class MainMenu{
         		else{productNumber.setEditable(false);}
         	}
         });
-        
         quantity.addKeyListener(new KeyAdapter() {
         	public void keyPressed(KeyEvent key){
         		if(key.getKeyChar()>='0'&&key.getKeyChar()<='9'){
@@ -171,7 +162,6 @@ public class MainMenu{
         		else{quantity.setEditable(false);}
         	}
         });
-        
         unitPrice.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent key){
         		if(key.getKeyChar()>='0'&&key.getKeyChar()<='9'){
@@ -187,7 +177,6 @@ public class MainMenu{
         		else{unitPrice.setEditable(false);}
         	}
         });
-        
         menuButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 inputShippingFrame.dispose();
@@ -196,7 +185,7 @@ public class MainMenu{
         });
         okButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                try {
+                try{
 					if(invoice.searchOrderNumber(orderNumber.getText())==true){
 					    JOptionPane.showMessageDialog(null,"Order number already in use.");
 					    orderNumber.setText("");
@@ -208,28 +197,28 @@ public class MainMenu{
 							unitPrice.getText().isEmpty()){
 						JOptionPane.showMessageDialog(null,"1 or more fields are empty");
 					}
-				} catch (HeadlessException e2) {
+                }
+                catch(HeadlessException e2){
 					// TODO Auto-generated catch block
 					e2.printStackTrace();
-				} catch (IOException e2) {
+                }
+                catch(IOException e2){
 					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				}
-                
-                //TRY BLOCK IOEXCEPTION
                 if(orderNumber.getText().equals("")==false){
 		            mInfo=new ManufacturerInformation(orderNumber.getText(),product.getText()
 		                        ,productNumber.getText(),quantity.getText(),unitPrice.getText());
-		            try {
+		            try{
 						inputCustomerInformationDisplay();
-					} catch (IOException e1) {
+                    }
+                    catch(IOException e1){
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 		            }
-		            inputShippingFrame.dispose();
-		                
-		            }
-            	}
+		            inputShippingFrame.dispose();      
+		        }
+            }
         });
         cancelButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
@@ -264,14 +253,13 @@ public class MainMenu{
         inputCustomerFrame.add(addressL);
         JTextField address=new JTextField(40);
         inputCustomerFrame.add(address);
-        //FIXME: phoneNumber: restrict so that only numbers go in    
         JLabel phoneNumberL=new JLabel("Phone Number");
         inputCustomerFrame.add(phoneNumberL);
+        //FIXME: figure textField or Formatted?
         //JTextField phoneNumber=new JTextField(40);
         JFormattedTextField phoneNumber=new JFormattedTextField();
         phoneNumber.setPreferredSize(new Dimension(445,20));
         inputCustomerFrame.add(phoneNumber);
-        
         JLabel emailL=new JLabel("Email");
         inputCustomerFrame.add(emailL);
         JTextField email=new JTextField(40);
@@ -288,9 +276,18 @@ public class MainMenu{
         inputCustomerFrame.add(backButton);
         JButton menuButton=new JButton("Main Menu");
         inputCustomerFrame.add(menuButton);
-
         inputCustomerFrame.setVisible(true);
         //inputCustomerInformationDisplay:element actions
+        phoneNumber.addKeyListener(new KeyAdapter(){
+        	public void keyPressed(KeyEvent key){
+        		if(key.getKeyChar()>='0'&&key.getKeyChar()<='9'){
+        			phoneNumber.setEditable(true);
+        		}
+        		else if(key.getKeyChar()=='\b'){phoneNumber.setEditable(true);}
+                else if(phoneNumber.getText().length()>10){phoneNumber.setEditable(false);}
+                else{phoneNumber.setEditable(false);}
+        	}
+        });
         menuButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 inputCustomerFrame.dispose();
@@ -308,26 +305,29 @@ public class MainMenu{
                 		email.getText().isEmpty()){
                 	JOptionPane.showMessageDialog(null,"1 or more fields are empty");	
                 }
+                else if(!(phoneNumber.getText().length()==10)){
+                	if(phoneNumber.getText().length()>10){JOptionPane.showMessageDialog(null,"Invalid phone number (too long)");}
+                	else{JOptionPane.showMessageDialog(null,"Invalid phone number (too short)");}
+                }
                 else if(name.getText().isEmpty()==false&&
                 		address.getText().isEmpty()==false&&
                 		phoneNumber.getText().isEmpty()==false&&
-                		email.getText().isEmpty()==false){
+                		email.getText().isEmpty()==false&&
+                		phoneNumber.getText().length()==10){
                 	cInfo=new CustomerInformation(name.getText(),address.getText(),
                             phoneNumber.getText(),email.getText(),notes.getText());
                 	invoice=new InvoiceGenerator(mInfo,cInfo);
                 	//TRY BLOCK IOEXCEPTION
-                    try {
+                    try{
     					invoice.addToFile();
-    				} catch (IOException e1) {
+                    }
+                    catch(IOException e1){
     					// TODO Auto-generated catch block
     					e1.printStackTrace();
     				}
                     inputCustomerFrame.dispose();
                     mainMenuDisplay();
-                	
-                }
-                
-                
+                }  
             }
         });
         cancelButton.addActionListener(new ActionListener(){
@@ -355,24 +355,21 @@ public class MainMenu{
         tableFrame.setSize(500,500);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         tableFrame.setLocation(dim.width/2-tableFrame.getSize().width/2, dim.height/2-tableFrame.getSize().height/2);
-
-        //FIXME: set up table
-        
         String[]colName={"Order Number","Product","Product No.","Qty","Unit Price",
                             "Subtotal","Tax","Total","Name","Address","Phone No.",
                             "Email","Notes"};
-        Object[][]rowData=invoice.fileReader(); 
-
+        Object[][]rowData=invoice.invoiceArray(); 
         JLabel shippingInfoL=new JLabel("Shipping Information");
         tableFrame.add(shippingInfoL);
+        //FIXME: is the DefaultTableModel needed? 
         DefaultTableModel model=new DefaultTableModel(rowData,colName);
         final JTable table=new JTable(model);
-        table.setPreferredScrollableViewportSize(new Dimension(1300,600));
-        table.setFillsViewportHeight(true);
+        //FIXME: are these needed?
+        //table.setPreferredScrollableViewportSize(new Dimension(1300,600));
+        //table.setFillsViewportHeight(true);
         JScrollPane scrollPane=new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(1300,600));
         tableFrame.add(scrollPane,BorderLayout.CENTER);
-        
         JButton menuButton=new JButton("Main Menu");
         tableFrame.add(menuButton);
         JButton cancelButton=new JButton("Back");
@@ -382,22 +379,18 @@ public class MainMenu{
         JTextField searchField=new JTextField(20);
         tableFrame.add(searchField);
         tableFrame.setVisible(true);
-
-        
+        //searcher
         TableRowSorter<TableModel> rowSorter=new TableRowSorter<>(table.getModel());
        	table.setRowSorter(rowSorter);
        	searchField.getDocument().addDocumentListener(new DocumentListener(){
-
 			@Override public void changedUpdate(DocumentEvent arg0) {
                 throw new UnsupportedOperationException();
             }
-            
 			@Override public void insertUpdate(DocumentEvent arg0) {
 				String text=searchField.getText();
 				if(text.trim().length()==0){rowSorter.setRowFilter(null);}
        			else{rowSorter.setRowFilter(RowFilter.regexFilter("(?i)"+text));}
 			}
-
 			@Override public void removeUpdate(DocumentEvent arg0) {
                 String text=searchField.getText();
 				if(text.trim().length()==0){
@@ -405,7 +398,6 @@ public class MainMenu{
                 }
                 else{rowSorter.setRowFilter(RowFilter.regexFilter("(?i)"+text));}	
 			}
-       		
        	});
         //informationTableDisplay:element actions
         menuButton.addActionListener(new ActionListener(){
@@ -416,51 +408,12 @@ public class MainMenu{
         });
         cancelButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                tableFrame.dispose();
+            	tableFrame.dispose();
                 informationDisplay();
             }
         });
     }
-    /*
-    public void searchDisplay(){
-        //searchDisplay:frame+frame elements
-        JFrame searchFrame=new JFrame("Shipping Management");
-        searchFrame.setLayout(frameLayout);
-        searchFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        searchFrame.setSize(500,500);
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        searchFrame.setLocation(dim.width/2-searchFrame.getSize().width/2, dim.height/2-searchFrame.getSize().height/2);
-        JLabel searchL=new JLabel("Search Order Number");
-        searchFrame.add(searchL);
-        JTextField search=new JTextField(40);
-        searchFrame.add(search);
-        JButton okButton=new JButton("OK");
-        searchFrame.add(okButton);
-        JButton cancelButton=new JButton("Back");
-        searchFrame.add(cancelButton);
-        JButton menuButton=new JButton("Main Menu");
-        searchFrame.add(menuButton);
-        searchFrame.setVisible(true);
-        //searchDisplay:element actions
-        menuButton.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                searchFrame.dispose();
-                mainMenuDisplay();
-            }
-        });
-        okButton.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                searchFrame.dispose();
-            }
-        });
-        cancelButton.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                searchFrame.dispose();
-                informationDisplay();
-            }
-        });
-    }
-	*/
+    
     public void removeDisplay(){
         //removeDisplay:frame+frame elements
         JFrame removeFrame=new JFrame("Shipping Management");
